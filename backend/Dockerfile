@@ -69,6 +69,12 @@ RUN { \
 
 WORKDIR /var/www/html
 
+# Composer binary from the vendor stage — we need it in runtime to rebuild
+# the classmap once the full app tree is in place (the vendor stage only
+# had composer.json + composer.lock, so its autoloader doesn't know about
+# app/ classes).
+COPY --from=vendor /usr/bin/composer /usr/local/bin/composer
+
 # Vendor first (cached), then the rest of the app.
 COPY --from=vendor /app/vendor ./vendor
 COPY . .
