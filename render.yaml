@@ -1,0 +1,102 @@
+# Render.com blueprint: single free web service for the Laravel backend.
+# Frontend deploys to Vercel separately (see vercel.json in frontend/).
+#
+# One-time setup after linking this repo to Render:
+#   1. Create a Neon Postgres project (https://neon.tech) — free tier.
+#   2. Create a Resend API key (https://resend.com) — free tier.
+#   3. In Render, replace the `sync: false` env vars below with real values.
+#   4. Trigger a deploy — the entrypoint runs migrations automatically.
+services:
+  - type: web
+    name: axiom-api
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+    envVars:
+      - key: APP_NAME
+        value: Axiom
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        sync: false
+      - key: APP_FRONTEND_URL
+        sync: false
+
+      - key: LOG_CHANNEL
+        value: production
+      - key: LOG_LEVEL
+        value: info
+
+      # Neon Postgres — paste your connection details from the Neon dashboard.
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: PGSSLMODE
+        value: require
+
+      # Free-tier friendly: keep cache/session/queue in the DB so we don't
+      # need a Redis add-on. Upgrade to Redis later without code changes.
+      - key: CACHE_STORE
+        value: database
+      - key: SESSION_DRIVER
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+
+      # Mail via Resend (3k/mo free).
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        value: smtp.resend.com
+      - key: MAIL_PORT
+        value: "465"
+      - key: MAIL_SCHEME
+        value: tls
+      - key: MAIL_USERNAME
+        value: resend
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM_ADDRESS
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Axiom
+
+      # Sanctum + CORS — must match the Vercel frontend domain.
+      - key: SANCTUM_STATEFUL_DOMAINS
+        sync: false
+      - key: SANCTUM_TOKEN_EXPIRATION
+        value: "60"
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+
+      - key: TWO_FACTOR_CHALLENGE_TTL
+        value: "5"
+
+      # Optional Sentry — leave blank to disable.
+      - key: SENTRY_LARAVEL_DSN
+        sync: false
+      - key: SENTRY_TRACES_SAMPLE_RATE
+        value: "0.1"
+      - key: SENTRY_SEND_DEFAULT_PII
+        value: "false"
