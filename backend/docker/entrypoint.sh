@@ -32,6 +32,15 @@ if [[ "${SKIP_MIGRATIONS:-false}" != "true" ]]; then
     php artisan migrate --force --no-interaction
 fi
 
+# One-shot seeder toggle. Set SEED_ON_STARTUP=true in Render env, redeploy,
+# then REMOVE the flag afterward — otherwise every deploy creates 10 more
+# factory users. UserSeeder is idempotent for the admin account (uses
+# updateOrCreate), but the factory-generated users are not.
+if [[ "${SEED_ON_STARTUP:-false}" == "true" ]]; then
+    echo "==> SEED_ON_STARTUP=true — running UserSeeder"
+    php artisan db:seed --class=UserSeeder --force --no-interaction || true
+fi
+
 # Warm the app + confirm the container is healthy before nginx exposes 8080.
 # A failed boot here surfaces in Render's deploy log instead of the health check.
 php artisan about --only=environment || true
