@@ -1,24 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class UserSeeder extends Seeder
+final class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // A known account so the login flow works out of the box.
-        User::updateOrCreate(
+        $this->call(RolesSeeder::class);
+
+        $admin = User::updateOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin',
                 'password' => Hash::make('password'),
-            ]
+                'email_verified_at' => now(),
+            ],
         );
 
-        User::factory(10)->create();
+        if (! $admin->hasRole('admin')) {
+            $admin->assignRole('admin');
+        }
+
+        User::factory()->count(10)->create()->each(function (User $user): void {
+            $user->assignRole('user');
+        });
     }
 }
