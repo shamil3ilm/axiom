@@ -1,0 +1,37 @@
+# Monorepo root .gitignore
+# Language-specific ignores live in backend/.gitignore and frontend/.gitignore
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+/.idea
+/.vscode
+/.fleet
+/.nova
+/.zed
+*.iml
+
+# Node (root-level tooling if any)
+/node_modules
+
+# Env files (leave .env.example tracked)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Build artifacts
+/dist
+/build
+
+# Claude local state
+.claude/
+
+# Backup of pre-monorepo frontend git repo (safe to delete once verified)
+frontend/.git.pre-monorepo-backup/
