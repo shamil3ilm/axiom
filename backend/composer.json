@@ -12,6 +12,7 @@
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^2.10.1",
         "pragmarx/google2fa-laravel": "^2.2",
+        "sentry/sentry-laravel": "^4.27",
         "spatie/laravel-permission": "^6.9",
         "symfony/css-selector": "^7.0",
         "symfony/yaml": "^7.0",
