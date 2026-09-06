@@ -9,7 +9,6 @@ use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\URL;
 
 final class EmailVerificationController extends Controller
@@ -28,7 +27,7 @@ final class EmailVerificationController extends Controller
         return response()->json(['message' => 'Verification link sent.']);
     }
 
-    public function verify(Request $request, int $id, string $hash): JsonResponse|Response
+    public function verify(Request $request, int $id, string $hash): JsonResponse
     {
         if (! URL::hasValidSignature($request)) {
             return response()->json(['message' => 'Invalid or expired verification link.'], 403);

@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Services\Auth\TwoFactorChallengeService;
-use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Illuminate\Http\JsonResponse;
@@ -18,10 +17,6 @@ use PragmaRX\Google2FALaravel\Facade as Google2FA;
 
 final class TwoFactorController extends Controller
 {
-    public function __construct(
-        private readonly TwoFactorChallengeService $twoFactor,
-    ) {}
-
     /**
      * Start 2FA enrollment: generate a secret, return it + otpauth QR SVG.
      * The secret is not persisted until confirmed with a valid code.
@@ -117,7 +112,7 @@ final class TwoFactorController extends Controller
 
         $renderer = new ImageRenderer(
             new RendererStyle(256),
-            new SvgImageBackEnd(),
+            new SvgImageBackEnd,
         );
 
         return (new Writer($renderer))->writeString($otpauth);

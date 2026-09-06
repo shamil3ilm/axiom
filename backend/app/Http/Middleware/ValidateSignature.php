@@ -1,11 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
-use Closure;
 use Illuminate\Routing\Middleware\ValidateSignature as Middleware;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class ValidateSignature extends Middleware
 {

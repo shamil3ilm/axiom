@@ -1,11 +1,8 @@
 <?php
 
-namespace App\Http\Middleware;
+declare(strict_types=1);
 
-use Closure;
-use Illuminate\Http\Request;
-use Illuminate\Foundation\Http\Middleware\TrimStrings as Middleware;
-use Symfony\Component\HttpFoundation\Response;
+namespace App\Http\Middleware;
 
 class TrimStrings
 {

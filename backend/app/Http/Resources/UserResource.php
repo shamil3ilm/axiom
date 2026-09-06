@@ -24,10 +24,7 @@ final class UserResource extends JsonResource
             'email' => $this->email,
             'email_verified' => $this->email_verified_at !== null,
             'two_factor_enabled' => $this->two_factor_confirmed_at !== null,
-            'roles' => $this->when(
-                method_exists($this, 'getRoleNames'),
-                fn () => $this->getRoleNames()->all(),
-            ),
+            'roles' => $this->getRoleNames()->all(),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

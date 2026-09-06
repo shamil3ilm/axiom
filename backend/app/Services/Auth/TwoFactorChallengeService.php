@@ -99,6 +99,6 @@ final class TwoFactorChallengeService
 
     private function ttlMinutes(): int
     {
-        return (int) env('TWO_FACTOR_CHALLENGE_TTL', 5);
+        return (int) config('two_factor.challenge_ttl', 5);
     }
 }

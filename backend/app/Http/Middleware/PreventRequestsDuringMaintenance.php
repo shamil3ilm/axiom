@@ -1,11 +1,8 @@
 <?php
 
-namespace App\Http\Middleware;
+declare(strict_types=1);
 
-use Closure;
-use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance as Middleware;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+namespace App\Http\Middleware;
 
 class PreventRequestsDuringMaintenance
 {

@@ -63,9 +63,16 @@ final class AppServiceProvider extends ServiceProvider
             ->by(Str::lower((string) $request->input('email', '')).'|'.$request->ip()));
 
         RateLimiter::for('two-factor', fn (Request $request) => Limit::perMinute(5)
-            ->by((string) ($request->user()?->id ?? $request->ip())));
+            ->by($this->requestSignature($request)));
 
         RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)
-            ->by((string) ($request->user()?->id ?? $request->ip())));
+            ->by($this->requestSignature($request)));
+    }
+
+    private function requestSignature(Request $request): string
+    {
+        $user = $request->user();
+
+        return $user !== null ? 'user:'.$user->getKey() : 'ip:'.$request->ip();
     }
 }

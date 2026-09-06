@@ -14,11 +14,18 @@ parameters:
     excludePaths:
         - database/migrations/*_create_cache_table.php
         - database/migrations/*_create_jobs_table.php
+        - database/migrations/*_create_permission_tables.php
 
     checkModelProperties: true
-    checkMissingIterableValueType: false
 
     ignoreErrors:
-        # Sanctum trait dynamic methods
-        - '#Call to an undefined method .+::createToken\(\)#'
-        - '#Call to an undefined method .+::currentAccessToken\(\)#'
+        # Laravel default UserFactory returns array<string,mixed>; the parent
+        # Factory<TModel>::definition() signature uses a more specific type.
+        -
+            message: '#Return type .+ of method Database\\Factories\\UserFactory::definition\(\) should be compatible with#'
+            path: database/factories/UserFactory.php
+
+        # Framework default: config/sanctum.php sprintf uses variadic args as a fallback list.
+        -
+            message: '#Call to sprintf contains 2 placeholders#'
+            path: config/sanctum.php
