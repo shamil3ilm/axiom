@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -24,6 +28,44 @@ final class AppServiceProvider extends ServiceProvider
         $this->configureHttps();
         $this->configurePasswordRules();
         $this->configureRateLimiters();
+        $this->configureFrontendNotificationUrls();
+    }
+
+    /**
+     * Point the framework's password-reset and email-verification notifications
+     * at the Angular SPA rather than nonexistent server-rendered routes.
+     *
+     * ResetPassword: deep link into the SPA's /reset-password page — the SPA
+     * reads token+email from the query string and calls POST /api/reset-password.
+     *
+     * VerifyEmail: keep the signature-bearing URL pointing at the API itself
+     * (our GET /api/email/verify/{id}/{hash} endpoint), but rewrite the host
+     * to APP_URL so the link works when reached from the outside world.
+     */
+    private function configureFrontendNotificationUrls(): void
+    {
+        ResetPassword::createUrlUsing(function (CanResetPassword $notifiable, string $token): string {
+            $frontend = rtrim((string) config('app.frontend_url', ''), '/');
+
+            return $frontend.'/reset-password?'.http_build_query([
+                'token' => $token,
+                'email' => $notifiable->getEmailForPasswordReset(),
+            ]);
+        });
+
+        // Notifiables are always Eloquent models via the Notifiable trait; the
+        // MustVerifyEmail contract alone doesn't expose getKey(). Narrow to
+        // App\Models\User (our only notifiable) so PHPStan sees the method.
+        VerifyEmail::createUrlUsing(function (User $notifiable): string {
+            return URL::temporarySignedRoute(
+                'verification.verify',
+                now()->addMinutes((int) config('auth.verification.expire', 60)),
+                [
+                    'id' => $notifiable->getKey(),
+                    'hash' => sha1($notifiable->getEmailForVerification()),
+                ],
+            );
+        });
     }
 
     private function configureHttps(): void
