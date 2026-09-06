@@ -74,19 +74,17 @@ DB_HOST=<neon-host> DB_DATABASE=<neon-db> DB_USERNAME=<neon-user> DB_PASSWORD=<n
 
 ## 4. Frontend — Vercel
 
+Before importing, edit `frontend/src/app/environment/environment.production.ts` and set `apiUrl` to your Render URL + `/api`. Commit + push. Vercel picks up whatever is committed.
+
 1. Sign up at <https://vercel.com> (GitHub login).
 2. **Add New** → **Project** → import `shamil3ilm/axiom`.
 3. **Root Directory** → `frontend` (Vercel auto-detects `vercel.json`).
-4. **Framework Preset** → **Other** (do not use "Angular" — that overrides our build command).
-5. **Environment Variables** → add:
-
-   | Name | Value | Environment |
-   |---|---|---|
-   | `NG_APP_API_URL` | Your Render URL + `/api` (e.g. `https://axiom-api-a1b2.onrender.com/api`) | Production |
-   | `NG_APP_SENTRY_DSN` | (optional) | Production |
-
-6. **Deploy** → Vercel runs `npm run build:vercel` which generates `environment.production.ts` from the env vars, then builds Angular.
+4. **Framework Preset** → **Other** (do not use "Angular" — that overrides our build command from `vercel.json`).
+5. **Environment Variables** → nothing to add. The API URL is committed in `environment.production.ts`.
+6. **Deploy** → Vercel runs `npm run build -- --configuration production` per `vercel.json`.
 7. Once deployed, Vercel shows the URL — e.g. `https://axiom-a1b2.vercel.app`.
+
+**To rotate the API URL later:** edit `environment.production.ts`, commit, push. Vercel auto-deploys on the push. No dashboard visit needed.
 
 ## 5. Wire the two together
 

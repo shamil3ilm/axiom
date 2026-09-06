@@ -58,25 +58,21 @@ Then sign in at <http://localhost:4200/login> with `admin@example.com` / `passwo
 
 Per build target via `fileReplacements` in [`angular.json`](angular.json):
 
-| Build target | File | API URL source |
-|--------------|------|----------------|
+| Build target | File | API URL |
+|--------------|------|---------|
 | `ng serve` (development) | `src/app/environment/environment.development.ts` | Hardcoded `http://127.0.0.1:8000/api` |
-| `ng build` (production) | `src/app/environment/environment.production.ts` | **Generated at build time** by `scripts/generate-environment.mjs` from `NG_APP_API_URL` (fails build loudly if missing) |
+| `ng build` (production) | `src/app/environment/environment.production.ts` | **Hardcoded** — edit the file, commit, push |
+
+To point the deployed SPA at a different backend, edit `apiUrl` in `environment.production.ts`, commit, push — Vercel auto-deploys on push to `main`. There is no build-time env-var indirection.
 
 ## Build
 
 ```bash
-npm run build                # production build (uses committed environment.production.ts)
-npm run build:vercel         # regenerates environment.production.ts from env, then builds
+npm run build                                    # production build (default)
+npm run build -- --configuration production      # explicit
 ```
 
-On Vercel the build command is `npm run build:vercel`. Set these env vars in the Vercel dashboard:
-
-| Name | Purpose |
-|------|---------|
-| `NG_APP_API_URL` | **Required.** Backend API base URL, e.g. `https://axiom-api.onrender.com/api` |
-| `NG_APP_SENTRY_DSN` | Optional. Enables Sentry error reporting |
-| `NG_APP_RELEASE` | Optional. Sentry release tag (falls back to `VERCEL_GIT_COMMIT_SHA`) |
+Vercel runs the production build via [`vercel.json`](vercel.json).
 
 ## Backend cold-start mitigation
 
@@ -105,7 +101,7 @@ src/app/
 ├── app.config.ts                       # Providers: router, HttpClient + interceptor, error handler, app initializer
 ├── app.routes.ts                       # Lazy-loaded routes
 ├── app.ts                              # Root shell (topbar + <router-outlet>)
-├── environment/                        # base / dev / prod (prod regenerated at build)
+├── environment/                        # base / dev / prod (all hardcoded)
 ├── guards/auth.guard.ts                # Route protection
 ├── interceptors/auth.interceptor.ts    # Bearer token injection
 ├── services/
