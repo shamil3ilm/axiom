@@ -1,16 +1,10 @@
-// Base environment. Angular swaps this file per build target via the
-// `fileReplacements` in angular.json (development -> environment.development.ts,
-// production -> environment.production.ts). The values here are the dev defaults.
-export interface Environment {
-  production: boolean;
-  apiUrl: string;
-  sentryDsn: string | null;
-  release: string | null;
-}
-
-export const environment: Environment = {
+// Base environment — the default when no build target replaces this file.
+// Angular's fileReplacements swaps this out for environment.development.ts
+// during `ng serve` and environment.production.ts during `ng build`, so
+// production runtime never sees these values.
+export const environment = {
   production: false,
   apiUrl: 'http://127.0.0.1:8000/api',
-  sentryDsn: null,
-  release: null,
+  sentryDsn: null as string | null,
+  release: null as string | null,
 };
