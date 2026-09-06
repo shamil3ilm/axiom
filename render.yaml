@@ -11,7 +11,7 @@ services:
     name: axiom-api
     runtime: docker
     plan: free
-    region: oregon
+    region: singapore
     branch: main
     rootDir: backend
     dockerfilePath: ./Dockerfile
