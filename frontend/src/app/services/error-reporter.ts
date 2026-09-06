@@ -36,10 +36,19 @@ export class ErrorReporter {
   }
 
   private async sendToSentry(error: unknown, context?: Record<string, unknown>): Promise<void> {
+    // The Sentry SDK is optional — it isn't in package.json by default so
+    // hobby builds don't ship the ~40 KB. To keep TypeScript happy without
+    // installing types, we route through a dynamic string import that the
+    // compiler cannot resolve. The runtime `catch` guards the "not installed"
+    // case, and the top-level try guards any SDK misbehavior.
     try {
-      const Sentry = await import(/* webpackIgnore: true */ '@sentry/browser').catch(
-        () => null,
-      );
+      const specifier = '@sentry/browser';
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval, no-new-func
+      const dynamicImport = new Function('m', 'return import(m)') as (
+        m: string,
+      ) => Promise<{ captureException: (e: unknown, opts?: unknown) => unknown } | null>;
+
+      const Sentry = await dynamicImport(specifier).catch(() => null);
       if (Sentry === null) {
         // eslint-disable-next-line no-console
         console.error('[error-reporter] @sentry/browser not installed', this.describe(error));

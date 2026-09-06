@@ -1,24 +1,37 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
 import { API_URL } from '../api.config';
+import { AuthUser } from './auth.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface CreateUserPayload {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+}
+
+interface UserCollectionResponse {
+  data: AuthUser[];
+}
+
+@Injectable({ providedIn: 'root' })
 export class ApiService {
+  private readonly http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
-
-  getUsers():Observable<any[]> {
-    return this.http.get<any[]>(`${API_URL}/users`);
+  getUsers(): Observable<AuthUser[]> {
+    return this.http
+      .get<UserCollectionResponse>(`${API_URL}/users`)
+      .pipe(map((response) => response.data));
   }
 
-  createUser(data: any) {
-    return this.http.post(`${API_URL}/users`, data);
+  createUser(payload: CreateUserPayload): Observable<{ data: AuthUser }> {
+    return this.http.post<{ data: AuthUser }>(`${API_URL}/users`, payload);
   }
 
-  deleteUser(id: number) {
-    return this.http.delete(`${API_URL}/users/${id}`);
+  deleteUser(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${API_URL}/users/${id}`);
   }
 }

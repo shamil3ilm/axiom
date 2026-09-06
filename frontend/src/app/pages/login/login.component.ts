@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { FormsModule, NgForm } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="login">
       <h2>Sign in</h2>
@@ -19,6 +20,7 @@ import { AuthService } from '../../services/auth.service';
             type="email"
             placeholder="Email"
             required
+            autocomplete="username"
             #emailInput="ngModel"
           />
           <div *ngIf="emailInput.invalid && emailInput.touched" class="error">
@@ -33,6 +35,7 @@ import { AuthService } from '../../services/auth.service';
             type="password"
             placeholder="Password"
             required
+            autocomplete="current-password"
             #passwordInput="ngModel"
           />
           <div *ngIf="passwordInput.invalid && passwordInput.touched" class="error">
@@ -43,9 +46,13 @@ import { AuthService } from '../../services/auth.service';
         <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
 
         <button type="submit" [disabled]="loginForm.invalid || isSubmitting">
-          {{ isSubmitting ? 'Signing in...' : 'Sign in' }}
+          {{ isSubmitting ? 'Signing in…' : 'Sign in' }}
         </button>
       </form>
+
+      <p class="forgot">
+        <a routerLink="/forgot-password">Forgot your password?</a>
+      </p>
     </div>
   `,
   styles: [
@@ -71,24 +78,23 @@ import { AuthService } from '../../services/auth.service';
         opacity: 0.6;
         cursor: not-allowed;
       }
+      .forgot {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 0.9em;
+      }
     `,
   ],
 })
 export class LoginComponent {
-  credentials = {
-    email: '',
-    password: '',
-  };
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
+  credentials = { email: '', password: '' };
   isSubmitting = false;
   errorMessage = '';
 
-  constructor(
-    private auth: AuthService,
-    private router: Router,
-  ) {}
-
-  onSubmit(form: { valid: boolean | null }): void {
+  onSubmit(form: NgForm): void {
     if (!form.valid || this.isSubmitting) {
       return;
     }
@@ -97,10 +103,20 @@ export class LoginComponent {
     this.errorMessage = '';
 
     this.auth.login(this.credentials).subscribe({
-      next: () => this.router.navigate(['/users']),
+      next: (result) => {
+        if (result.kind === 'two_factor_required') {
+          // Route state carries the challenge token — it never appears in the
+          // URL bar, and disappears if the user hits refresh (which we treat
+          // as "start over with password again").
+          this.router.navigate(['/two-factor'], {
+            state: { challengeToken: result.challengeToken },
+          });
+          return;
+        }
+        this.router.navigate(['/users']);
+      },
       error: (error) => {
-        this.errorMessage =
-          error?.error?.message ?? 'Invalid credentials. Please try again.';
+        this.errorMessage = error?.error?.message ?? 'Invalid credentials. Please try again.';
         this.isSubmitting = false;
       },
     });
